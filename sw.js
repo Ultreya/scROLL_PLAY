@@ -1,5 +1,5 @@
 // Codex scope only. Never remove caches belonging to another app or branch.
-const CACHE='piano-codex-b42ef7ca88a4';
+const CACHE='piano-codex-3e02ada11d78';
 const CORE=['./','index.html','library.js','manifest.webmanifest','help.html','icons/scroll-play-icon.png','basic-pitch.js','model-data.js','lib/index.json','assets/scroll-play-logo.jpg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('piano-codex-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));

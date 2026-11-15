@@ -4,11 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "esbuild youtube.js --bundle --format=esm --platform=browser --target=safari16 --minify --outfile=../youtube-client.js",
-    "test": "node --test test-storage.cjs"
-  },
-  "dependencies": {
-    "youtubei.js": "18.3.0",
-    "bgutils-js": "4.0.3"
+    "test": "node --test test-storage.cjs test-youtube.mjs"
   },
   "devDependencies": {
     "esbuild": "0.28.2",

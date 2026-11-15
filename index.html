@@ -1030,7 +1030,7 @@ ol.steps { margin: 0; padding-left: 20px; color: var(--muted); font-size: 14px; 
     try{
       if(!window.BP||!window.BP_MODEL)throw new Error('The note finder is loading. Try again shortly.');
       ensureCtx();await libraryReady;busy=true;$('youtubeGo').disabled=true;prog.hidden=false;prog.removeAttribute('value');
-      var youtube=await import('./youtube-client.js');
+      var youtube=await import('./youtube-client.js?v=keyless-1');
       var result=await youtube.getAudio($('youtubeUrl').value.trim(),status);
       if(!$('name').value.trim())$('name').value=result.title.slice(0,80);
       var file=new File([result.blob],result.title.slice(0,120)+'.m4a',{type:result.blob.type});

@@ -15,4 +15,4 @@ Audio and YouTube importing are experimental. The modern-song catalogue is a lis
 
 ## Credits
 
-PDMX: Long et al., https://github.com/pnlong/PDMX and https://zenodo.org/records/15571083. The supplied classical/folk library and hand model are retained. Salamander Grand Piano: Alexander Holm, CC BY 3.0. Violin/cello: tonejs-instruments, Nicholaus Brosowsky, CC BY 3.0. Basic Pitch and TensorFlow.js: Apache-2.0. youtubei.js and bgutils-js: MIT. Contributor metadata and musical arrangements have not all been checked; catalogue presence is not a claim that a modern composition is public domain.
+PDMX: Long et al., https://github.com/pnlong/PDMX and https://zenodo.org/records/15571083. The supplied classical/folk library and hand model are retained. Salamander Grand Piano: Alexander Holm, CC BY 3.0. Violin/cello: tonejs-instruments, Nicholaus Brosowsky, CC BY 3.0. Basic Pitch and TensorFlow.js: Apache-2.0. Contributor metadata and musical arrangements have not all been checked; catalogue presence is not a claim that a modern composition is public domain.
