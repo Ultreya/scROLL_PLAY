@@ -1,0 +1,8 @@
+const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+const {IDBFactory}=require('fake-indexeddb');
+const source=fs.readFileSync(__dirname+'/../library.js','utf8');
+function app(indexedDB){const window={};vm.runInNewContext(source,{window,indexedDB});return window.SongLibrary;}
+const song={id:'codex-test',name:'Saved piano piece',t:1,n:[[0,1,60,.8,'R'],[0,1,48,.5,'L']]};
+test('saved songs survive a fresh app context and removal is committed',async()=>{const db=new IDBFactory();const first=await app(db).open();await first.put(song);const second=await app(db).open();assert.equal((await second.list())[0].name,song.name);await second.remove(song.id);assert.equal((await first.list()).length,0);});
+test('an aborted write rejects rather than reporting a successful save',async()=>{const db=new IDBFactory();const api=await app(db).open();const r=db.open('pianoScroll.codex.library',1);const handle=await new Promise((resolve,reject)=>{r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});const proto=Object.getPrototypeOf(handle),original=proto.transaction;proto.transaction=function(...args){const tx=original.apply(this,args);if(args[1]==='readwrite')queueMicrotask(()=>tx.abort());return tx;};try{await assert.rejects(api.put(song));}finally{proto.transaction=original;}assert.equal((await api.list()).length,0);});
+test('invalid note data is rejected before a storage write',async()=>{const api=await app(new IDBFactory()).open();await assert.rejects(api.put({...song,n:[[0,-1,999,.8]]}),/Invalid song data/);assert.equal((await api.list()).length,0);});

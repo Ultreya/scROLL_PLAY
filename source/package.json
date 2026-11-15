@@ -1,0 +1,17 @@
+{
+  "name": "piano-scroll-codex-playback",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild youtube.js --bundle --format=esm --platform=browser --target=safari16 --minify --outfile=../youtube-client.js",
+    "test": "node --test test-storage.cjs"
+  },
+  "dependencies": {
+    "youtubei.js": "18.3.0",
+    "bgutils-js": "4.0.3"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "fake-indexeddb": "6.2.4"
+  }
+}

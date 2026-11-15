@@ -1,0 +1,19 @@
+{
+  "name": "scROLL_PLAY",
+  "short_name": "scROLL_PLAY",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#17141f",
+  "theme_color": "#17141f",
+  "description": "Follow falling piano notes at your own pace. Codex edition with a 300-piece library and songs saved on your device.",
+  "icons": [
+    {
+      "src": "icons/scroll-play-icon.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
