@@ -1,5 +1,7 @@
 # scROLL_PLAY
 
+![scROLL_PLAY logo](assets/scroll-play-logo.jpg)
+
 Follow the piano notes. Play at your pace.
 
 - Practise with 300 built-in classical and folk pieces.
@@ -7,7 +9,11 @@ Follow the piano notes. Play at your pace.
 - Keep songs on your device, with backup and restore.
 - Add the app to your iPhone Home Screen.
 
-**Website:** awaiting launch. This GitHub page contains the app’s source code.
+**Website:** uploaded and awaiting GitHub Pages activation.
+
+Owner setup: [Open Pages settings](https://github.com/Ultreya/scROLL_PLAY/settings/pages) → **Deploy from a branch** → **main** → **/(root)** → **Save**.
+
+This GitHub page contains the app’s source code. The published website opens the piano player.
 
 Audio and YouTube importing are experimental. The modern-song catalogue is a list; its scores are not connected to the player yet.
 
