@@ -3,11 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "esbuild youtube.js --bundle --format=esm --platform=browser --target=safari16 --minify --outfile=../youtube-client.js",
-    "test": "node --test test-storage.cjs test-youtube.mjs"
+    "test": "node --test test-storage.cjs test-catalogue.cjs test-player.cjs"
   },
   "devDependencies": {
-    "esbuild": "0.28.2",
-    "fake-indexeddb": "6.2.4"
+    "fake-indexeddb": "6.2.4",
+    "linkedom": "0.18.12"
   }
 }

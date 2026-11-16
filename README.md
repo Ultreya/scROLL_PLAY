@@ -1,26 +1,17 @@
 # scROLL_PLAY
 
-[![scROLL_PLAY logo](assets/scroll-play-logo.jpg)](https://ultreya.github.io/scROLL_PLAY/)
+[![scROLL_PLAY](assets/scroll-play-logo.jpg)](https://ultreya.github.io/scROLL_PLAY/)
 
-Follow the piano notes. Play at your pace.
+**[Open the app](https://ultreya.github.io/scROLL_PLAY/)**
 
-- Practise with 300 built-in classical and folk pieces.
-- Slow playback and practise either hand.
-- Keep songs on your device, with backup and restore.
-- Add the app to your iPhone Home Screen.
+Choose a song from the library or upload a recording or score. Follow the notes, slow the playback and practise either hand. The keyboard fits the song in portrait; expand the player or browse all 88 keys if you prefer.
 
-**[Open scROLL_PLAY](https://ultreya.github.io/scROLL_PLAY/)**
+The playable shared library contains 1,644 arrangements: 1,344 newly imported arrangements and the existing 300 classical/folk pieces. Search by song or artist and filter by genre, period or decade. Release-decade metadata is incomplete; missing values are labelled. This is a selection from PDMX, not the whole MuseScore website.
 
-On iPhone: open that link in Safari → Share → Add to Home Screen → Add.
+Your uploads and ten recently played songs currently belong to your browser/device. They are not published into this public repository. Private account-based storage is required for cross-device sync and is not enabled yet. The app supports backup and restore.
 
-In the app, tap Play for the example, or Browse 300 pieces → choose a composer/title → Open scroll → Play.
+On iPhone, open the app in Safari, then Share → Add to Home Screen. Existing saved uploads are retained by this update.
 
-This GitHub page contains the source code; the link above opens the app.
+Audio: MP3, M4A, WAV and browser-supported formats. Video: MP4/MOV where the browser can decode its audio. Scores: MIDI, MusicXML and MXL. Recording transcription works best with clear piano and can produce mistakes. There is no YouTube-link import.
 
-Audio and YouTube importing are experimental. The modern-song catalogue is a list; its scores are not connected to the player yet.
-
-*Codex edition.*
-
-## Credits
-
-PDMX: Long et al., https://github.com/pnlong/PDMX and https://zenodo.org/records/15571083. The supplied classical/folk library and hand model are retained. Salamander Grand Piano: Alexander Holm, CC BY 3.0. Violin/cello: tonejs-instruments, Nicholaus Brosowsky, CC BY 3.0. Basic Pitch and TensorFlow.js: Apache-2.0. Contributor metadata and musical arrangements have not all been checked; catalogue presence is not a claim that a modern composition is public domain.
+Credits and score provenance are in [credits.html](https://ultreya.github.io/scROLL_PLAY/credits.html).

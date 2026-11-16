@@ -7,7 +7,7 @@
   "display": "standalone",
   "background_color": "#17141f",
   "theme_color": "#17141f",
-  "description": "Follow falling piano notes at your own pace. Codex edition with a 300-piece library and songs saved on your device.",
+  "description": "Piano practice at your pace. Browse songs, choose a hand and follow the falling notes.",
   "icons": [
     {
       "src": "icons/scroll-play-icon.png",
