@@ -690,6 +690,7 @@
     return await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text();
   }
   async function openScoreFile(file, ext) {
+    busy=true;
     try {
       var notes;
       if (ext === 'mxl') notes = notesFromMusicXml(await unzipMxl(await file.arrayBuffer()));
@@ -703,12 +704,12 @@
       var s={id:'s'+Date.now(),name:$('name').value.trim()||file.name.replace(/\.[^.]+$/,'')||'Untitled song',link:'',notes:notes,score:true,source:'upload',artist:$('artist').value.trim(),genre:$('uploadGenre').value,decade:$('uploadDecade').value};
       setSong(s);
       var saved = await saveSong(s);
-      status(notes.length + ' notes read from the file. ' + (known ? 'Left and right hands come from the file.' : 'The file does not mark the hands, so they are worked out automatically.') + (saved ? ' Saved to My songs.' : ''));
+      status(notes.length + ' notes read from the file. ' + (known ? 'Left and right hands come from the file.' : 'The file does not mark the hands, so they are worked out automatically.') + (saved ? ' Saved to your uploads.' : ''));
       $('name').value = '';
       $('playerStage').scrollIntoView({behavior:'smooth',block:'start'});
     } catch (e) {
       status('That file could not be read as MIDI or MusicXML.', true);
-    }
+    } finally {busy=false;}
   }
   $('file').addEventListener('change', async function () {
     var file = this.files && this.files[0];
@@ -747,7 +748,8 @@
       } else {
         setSong(s);
         var saved = await saveSong(s);
-        status(notes.length + ' notes found. ' + (saved ? 'Saved to My songs.' : 'It could not be saved on this phone, so it stays only until you close the page.'));
+        var originalSaved=true;if(saved&&library?.cloud&&library.putFile){try{var original=await library.putFile(s.id,file);var rec=songCache.find(function(x){return x.id===s.id;});if(rec){rec.originalPath=original.path;rec.originalType=original.type;}}catch(e){originalSaved=false;storeNote('Piano notes saved. '+e.message,true);}}
+        status(notes.length + ' notes found. ' + (saved ? 'Saved to your library.' : 'It could not be saved on this phone, so it stays only until you close the page.'));
         $('name').value = '';
         $('playerStage').scrollIntoView({behavior:'smooth',block:'start'});
       }
@@ -760,7 +762,7 @@
   }
 
   // ---------- saved songs ----------
-  var songCache=[],library=null,libraryReady=Promise.resolve();
+  var songCache=[],library=null,deviceLibrary=null,libraryEpoch=0,libraryReady=Promise.resolve();
   function storeNote(msg,err){var el=$('storeNote');el.textContent=msg;el.className='note'+(err?' status err':'');}
   function loadSongs(){return songCache.slice().sort(function(a,b){return (b.t||b.updated||0)-(a.t||a.updated||0);});}
   function unpack(id, d) {
@@ -776,13 +778,14 @@
   async function saveSong(s){
     await libraryReady;
     var previous=songCache.find(function(x){return x.id===s.id;})||{};
-    var rec={id:s.id,name:s.name,link:cleanLink(s.link),source:s.source||previous.source||(String(s.id).startsWith('lib_')?'shared':'upload'),artist:s.artist||previous.artist||'',genre:s.genre||previous.genre||'Not listed',decade:s.decade||previous.decade||'Not listed',era:s.era||previous.era||'',sharedId:s.sharedId||previous.sharedId||null,playedAt:previous.playedAt||0,o:s.split||0,sc:s.score?1:0,t:Date.now(),n:(s.raw||s.notes).map(function(n){return n.h0?[n.s,n.d,n.p,n.a,n.h0]:[n.s,n.d,n.p,n.a];})};
+    var rec={id:s.id,name:s.name,link:cleanLink(s.link),source:s.source||previous.source||(String(s.id).startsWith('lib_')?'shared':'upload'),artist:s.artist||previous.artist||'',genre:s.genre||previous.genre||'Not listed',decade:s.decade||previous.decade||'Not listed',era:s.era||previous.era||'',sharedId:s.sharedId||previous.sharedId||null,playedAt:previous.playedAt||0,originalPath:s.originalPath||previous.originalPath||null,originalType:s.originalType||previous.originalType||null,o:s.split||0,sc:s.score?1:0,t:Date.now(),n:(s.raw||s.notes).map(function(n){return n.h0?[n.s,n.d,n.p,n.a,n.h0]:[n.s,n.d,n.p,n.a];})};
     songCache=loadSongs().filter(function(x){return x.id!==rec.id;});songCache.unshift(rec);renderSongs();
-    try{if(!library)throw new Error('Song storage is unavailable');await library.put(rec);storeNote('Saved on this device.');return true;}
+    try{if(!library)throw new Error('Song storage is unavailable');await library.put(rec);storeNote(library.cloud?'Saved privately in your account.':'Saved in this browser.');return true;}
     catch(e){storeNote('NOT SAVED: '+e.message+'. Use Back up songs before closing.',true);return false;}
   }
-  $('exportLibrary').addEventListener('click',function(){
-    var blob=new Blob([JSON.stringify({format:'piano-scroll-library',version:1,songs:loadSongs()},null,2)],{type:'application/json'});
+  $('exportLibrary').addEventListener('click',async function(){
+    await libraryReady;var records=[];for(var r of loadSongs()){try{records.push(r.n?r:await library.get(r.id));}catch(e){storeNote('Backup could not load a saved song. Try again.',true);return;}}
+    var blob=new Blob([JSON.stringify({format:'piano-scroll-library',version:1,songs:records},null,2)],{type:'application/json'});
     var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='scROLL_PLAY-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(url);},10000);
   });
   $('restoreLibrary').addEventListener('change',async function(){
@@ -791,28 +794,34 @@
       for(var record of data.songs){if(songCache.some(function(x){return x.id===record.id;}))continue;await library.put(record);songCache.push(record);}renderSongs();storeNote('Backup restored. Existing songs were kept.');
     }catch(e){renderSongs();storeNote('Restore stopped: '+e.message+'. Previously restored songs are kept.',true);}
   });
-  function openSaved(x){
+  async function openSaved(x){
+    await libraryReady;var epoch=libraryEpoch;if(!x.n){if(!library?.get)throw new Error('This song is unavailable');x=await library.get(x.id);}if(epoch!==libraryEpoch)return;
     raw=null;origBuf=null;
-    setSong({id:x.id,name:x.name,link:cleanLink(x.link),split:x.o||0,score:!!x.sc,source:x.source,artist:x.artist,genre:x.genre,era:x.era,decade:x.decade,sharedId:x.sharedId,
+    setSong({id:x.id,name:x.name,link:cleanLink(x.link),split:x.o||0,score:!!x.sc,source:x.source,artist:x.artist,genre:x.genre,era:x.era,decade:x.decade,sharedId:x.sharedId,originalPath:x.originalPath,originalType:x.originalType,
       notes:x.n.map(function(a){return {s:a[0],d:a[1],p:a[2],a:a[3],h0:a[4]};})});
+    if(x.originalPath&&library?.getFile){var active=library,owner=active.user?.()?.id,id=x.id;active.getFile(id).then(function(blob){ensureCtx();return blob.arrayBuffer();}).then(decode).then(function(buffer){if(library===active&&song.id===id&&active.user?.()?.id===owner){origBuf=buffer;$('sound').querySelector('[value="orig"]').disabled=false;}}).catch(function(){storeNote('The piano notes loaded, but the original recording could not be downloaded.',true);});}
   }
   function renderSongs(){window.dispatchEvent(new CustomEvent('scroll:library-change'));}
   async function markPlayed(id){
     if(!id)return;await libraryReady;var rec=songCache.find(function(x){return x.id===id;});if(!rec)return;
-    rec.playedAt=Date.now();renderSongs();try{if(library)await library.put(rec);}catch(e){storeNote('Recent plays could not be saved.',true);}
+    rec.playedAt=Date.now();renderSongs();try{if(library?.touch)await library.touch(rec.id,rec.playedAt);else if(library)await library.put(rec);}catch(e){storeNote('Recent plays could not be saved.',true);}
   }
   window.ScrollPlayer={
     saved:function(){return loadSongs();},
     ready:function(){return libraryReady;},
+    busy:function(){return busy;},
+    deviceSongs:async function(){await libraryReady;return deviceLibrary.list();},
+    moveDeviceSongs:async function(){await libraryReady;if(!library?.cloud)throw new Error('Sign in first.');busy=true;try{var rows=await deviceLibrary.list();for(var rec of rows){if(songCache.some(function(x){return x.id===rec.id;}))continue;await library.put(rec);await deviceLibrary.remove(rec.id);}songCache=await library.list();renderSongs();}finally{busy=false;}},
+    useLibrary:async function(api){if(busy)throw new Error('Wait for the current song to finish.');await libraryReady;var epoch=++libraryEpoch;stop();raw=null;origBuf=null;songCache=[];library=api||deviceLibrary;setSong({name:'Choose a song',notes:[],empty:true});renderSongs();var records=await library.list();if(epoch!==libraryEpoch)return;songCache=records.filter(function(x){return SongLibrary.valid(x)||SongLibrary.validSummary(x);});renderSongs();storeNote(api?.cloud?'Your library is saved privately in your account.':'Your uploads and recent plays are saved in this browser.');},
     openSaved:openSaved,
     remove:async function(id){await libraryReady;if(!library)throw new Error('Storage is unavailable');await library.remove(id);songCache=songCache.filter(function(x){return x.id!==id;});renderSongs();},
     openShared:async function(meta){
-      await libraryReady;var data;
+      await libraryReady;var epoch=libraryEpoch,data;
       if(meta.legacyChunk){var r=await fetch('lib/'+meta.legacyChunk);if(!r.ok)throw new Error('This song could not load. Check your connection.');var chunk=await r.json();data=unpack(meta.id,{name:meta.title,n:chunk[meta.legacyIndex]}).n;}
       else{var r=await fetch(meta.file);if(!r.ok)throw new Error('This song could not load. Check your connection.');data=(await r.json()).n;}
-      var rec={id:meta.id,name:meta.title,n:data,sc:1,source:'shared',artist:meta.artist,genre:meta.genre,era:meta.era,decade:meta.decade,sharedId:meta.id};
+      if(epoch!==libraryEpoch)return;var rec={id:meta.id,name:meta.title,n:data,sc:1,source:'shared',artist:meta.artist,genre:meta.genre,era:meta.era,decade:meta.decade,sharedId:meta.id};
       if(!SongLibrary.valid(rec))throw new Error('This score could not be read.');
-      openSaved(rec);await saveSong(song);$('playerStage').scrollIntoView({behavior:'smooth',block:'start'});
+      await openSaved(rec);await saveSong(song);$('playerStage').scrollIntoView({behavior:'smooth',block:'start'});
     }
   };
   // ---------- boot ----------
@@ -820,7 +829,7 @@
   setSong({name:'Choose a song',link:'',notes:[],empty:true});
   libraryReady=(async function(){
     try{
-      library=await SongLibrary.open();songCache=(await library.list()).filter(SongLibrary.valid);
+      library=await SongLibrary.open();deviceLibrary=library;songCache=(await library.list()).filter(SongLibrary.valid);
       var legacy;try{legacy=JSON.parse(localStorage.getItem(STORE)||'[]');}catch(e){legacy=[];}
       if(Array.isArray(legacy)){for(var record of legacy){if(SongLibrary.valid(record)&&!songCache.some(function(x){return x.id===record.id;})){await library.put(record);songCache.push(record);}}if(legacy.length){localStorage.setItem(STORE+'.backup',JSON.stringify(legacy));localStorage.removeItem(STORE);}}
       if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(function(){});

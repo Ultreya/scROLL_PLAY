@@ -1,0 +1,15 @@
+# Private cross-device libraries
+
+The app now connects to its own Lovable Cloud / Supabase backend on a free plan. No paid upgrade or automatic top-up has been enabled. GitHub Pages still hosts the app and shared score collection; private uploads never belong in this public repository.
+
+`sync-config.json` contains only the service URL and public browser publishable key. This is intentionally public configuration, not a privileged credential. Never commit a service-role key, secret key, SMTP credential, GitHub token or database password.
+
+Email/password sign-in is enabled and email verification is retained. Authentication settings and CORS from the live GitHub Pages origin were checked against the live service. Anonymous requests to the songs endpoint return 401. No real accounts or confirmation emails were created during setup. Actual email delivery and first-user sign-in still need a user check.
+
+The confirmation email may return to the backend’s default site. The user can close that page and return to scROLL_PLAY to sign in. The owner can improve this in the backend’s Auth URL settings by allowing `https://ultreya.github.io/scROLL_PLAY/**` and setting the site URL to `https://ultreya.github.io/scROLL_PLAY/`. This owner-only setting was not available through the connected tools; do not claim it was configured. A custom mail-sending domain required a paid plan and was not enabled.
+
+`private-library.sql` documents the schema. Row-level security is forced for every song operation. The originals bucket is private and requires owner-prefixed paths. Rolled-back tests on the actual database checked song ownership and original-file SELECT, INSERT and UPDATE isolation; no users, songs or file records were left behind. Direct SQL deletion of storage objects is prohibited by the platform, so file deletion must use its Storage API. The adapter does that. An authenticated two-user Storage HTTP upload/download/delete test has not been performed.
+
+The app requests summaries first and full note data when opening a song. Private API responses are not service-worker cached. Sign-out clears the session and displayed song data. Browser data is never automatically imported into every account on a shared computer. Explicit migration removes a browser record only after its cloud write succeeds; an existing account ID leaves the local duplicate intact. Recordings up to 50 MB can be retained; if original-file storage fails, the saved piano notes are retained and the user sees a warning.
+
+Checks: source/test-cloud.cjs verifies public-key restrictions, authentication headers, refresh, sign-out offline, lazy score loading, signup confirmation behavior and original-file deletion ordering. Headless Chromium checks exercised the portrait UI and actual MP3/MP4 transcription. This managed environment’s Chromium lacks its network proxy CA, so external-request QA used a browser-only certificate override; application code and the phone’s TLS settings were not changed. Python HTTPS requests with normal certificate validation also reached the service.

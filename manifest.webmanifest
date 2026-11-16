@@ -5,8 +5,8 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#17141f",
-  "theme_color": "#17141f",
+  "background_color": "#f7f5f2",
+  "theme_color": "#f7f5f2",
   "description": "Piano practice at your pace. Browse songs, choose a hand and follow the falling notes.",
   "icons": [
     {

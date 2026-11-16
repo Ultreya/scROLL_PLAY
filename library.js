@@ -38,5 +38,6 @@
     };
     return api;
   }
-  window.SongLibrary = {open: create, valid: valid};
+  function validSummary(x){return x&&x.remote===true&&typeof x.id==='string'&&/^[A-Za-z0-9_-]{1,160}$/.test(x.id)&&typeof x.name==='string'&&x.name.length<=200&&Number.isInteger(x.notesCount)&&x.notesCount>0&&x.notesCount<=200000;}
+  window.SongLibrary = {open:create,valid:valid,validSummary:validSummary};
 })();

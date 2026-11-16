@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test test-storage.cjs test-catalogue.cjs test-player.cjs"
+    "test": "node --test test-storage.cjs test-catalogue.cjs test-player.cjs test-cloud.cjs"
   },
   "devDependencies": {
     "fake-indexeddb": "6.2.4",
